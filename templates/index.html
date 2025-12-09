@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recorder Pro - Record, Convert & Clean Audio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-microphone-alt"></i>
+                <h1>Voice Recorder Pro</h1>
+            </div>
+            <p class="tagline">Record, Convert & Clean Your Audio</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab Navigation -->
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="record">
+                    <i class="fas fa-microphone"></i>
+                    <span>Record</span>
+                </button>
+                <button class="tab-btn" data-tab="upload">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload</span>
+                </button>
+                <button class="tab-btn" data-tab="process">
+                    <i class="fas fa-magic"></i>
+                    <span>Process</span>
+                </button>
+            </nav>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Record Tab -->
+                <div class="tab-pane active" id="record-tab">
+                    <div class="recorder-container">
+                        <!-- Visualizer -->
+                        <div class="visualizer-container">
+                            <canvas id="visualizer"></canvas>
+                            <div class="recording-indicator" id="recording-indicator">
+                                <span class="pulse"></span>
+                                <span class="time" id="recording-time">00:00</span>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="recorder-controls">
+                            <button class="control-btn" id="record-btn" title="Start Recording">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="control-btn" id="pause-btn" disabled title="Pause">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <button class="control-btn" id="stop-btn" disabled title="Stop">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
+
+                        <!-- Audio Player -->
+                        <div class="audio-player hidden" id="audio-player">
+                            <audio id="audio-element" controls></audio>
+                        </div>
+
+                        <!-- Recording Info -->
+                        <div class="recording-info hidden" id="recording-info">
+                            <h3>Recording Complete</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">Duration:</span>
+                                    <span class="value" id="info-duration">--</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Size:</span>
+                                    <span class="value" id="info-size">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div class="tab-pane" id="upload-tab">
+                    <div class="upload-container">
+                        <div class="upload-area" id="upload-area">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Drag & Drop Audio File</h3>
+                            <p>or click to browse</p>
+                            <p class="supported-formats">
+                                Supported: MP3, WAV, OGG, FLAC, M4A, AAC, WebM
+                            </p>
+                            <input type="file" id="file-input" accept="audio/*" hidden>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div class="upload-progress hidden" id="upload-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text">Uploading...</span>
+                        </div>
+
+                        <!-- File Info -->
+                        <div class="file-info hidden" id="file-info">
+                            <h3>File Uploaded</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">Filename:</span>
+                                    <span class="value" id="upload-filename">--</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Duration:</span>
+                                    <span class="value" id="upload-duration">--</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Sample Rate:</span>
+                                    <span class="value" id="upload-samplerate">--</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Channels:</span>
+                                    <span class="value" id="upload-channels">--</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="process-uploaded-btn">
+                                <i class="fas fa-magic"></i> Process This File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Tab -->
+                <div class="tab-pane" id="process-tab">
+                    <div class="process-container">
+                        <!-- Current File -->
+                        <div class="current-file-card" id="current-file-card">
+                            <h3>Current File</h3>
+                            <p id="current-filename">No file selected</p>
+                            <audio id="preview-audio" controls class="hidden"></audio>
+                        </div>
+
+                        <!-- Processing Options -->
+                        <div class="processing-sections">
+                            <!-- Noise Reduction Section -->
+                            <div class="processing-section">
+                                <h3><i class="fas fa-volume-down"></i> Noise Reduction</h3>
+                                
+                                <div class="option-group">
+                                    <label class="slider-label">
+                                        <span>Reduction Strength</span>
+                                        <span id="strength-value">75%</span>
+                                    </label>
+                                    <input type="range" id="noise-strength" min="0" max="100" value="75" class="slider">
+                                </div>
+
+                                <div class="option-group checkboxes">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="remove-clicks" checked>
+                                        <span class="checkmark"></span>
+                                        <span>Remove Clicks & Pops</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="reduce-echo">
+                                        <span class="checkmark"></span>
+                                        <span>Reduce Echo/Reverb</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="remove-silence">
+                                        <span class="checkmark"></span>
+                                        <span>Remove Silence</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="normalize" checked>
+                                        <span class="checkmark"></span>
+                                        <span>Normalize Volume</span>
+                                    </label>
+                                </div>
+
+                                <button class="btn btn-primary btn-full" id="apply-noise-reduction">
+                                    <i class="fas fa-wand-magic-sparkles"></i> Apply Noise Reduction
+                                </button>
+                            </div>
+
+                            <!-- Format Conversion Section -->
+                            <div class="processing-section">
+                                <h3><i class="fas fa-exchange-alt"></i> Format Conversion</h3>
+                                
+                                <div class="option-group">
+                                    <label>Output Format</label>
+                                    <div class="format-buttons">
+                                        <button class="format-btn active" data-format="mp3">MP3</button>
+                                        <button class="format-btn" data-format="wav">WAV</button>
+                                        <button class="format-btn" data-format="ogg">OGG</button>
+                                        <button class="format-btn" data-format="flac">FLAC</button>
+                                        <button class="format-btn" data-format="m4a">M4A</button>
+                                    </div>
+                                </div>
+
+                                <div class="option-group" id="bitrate-group">
+                                    <label>Bitrate (MP3/OGG/M4A)</label>
+                                    <select id="bitrate-select">
+                                        <option value="128k">128 kbps</option>
+                                        <option value="192k" selected>192 kbps</option>
+                                        <option value="256k">256 kbps</option>
+                                        <option value="320k">320 kbps</option>
+                                    </select>
+                                </div>
+
+                                <div class="option-group">
+                                    <label>Sample Rate</label>
+                                    <select id="samplerate-select">
+                                        <option value="22050">22050 Hz</option>
+                                        <option value="44100" selected>44100 Hz</option>
+                                        <option value="48000">48000 Hz</option>
+                                        <option value="96000">96000 Hz</option>
+                                    </select>
+                                </div>
+
+                                <button class="btn btn-secondary btn-full" id="convert-btn">
+                                    <i class="fas fa-sync-alt"></i> Convert Format
+                                </button>
+                            </div>
+
+                            <!-- Audio Analysis -->
+                            <div class="processing-section">
+                                <h3><i class="fas fa-chart-bar"></i> Audio Analysis</h3>
+                                <button class="btn btn-outline btn-full" id="analyze-btn">
+                                    <i class="fas fa-search"></i> Analyze Audio
+                                </button>
+                                
+                                <div class="analysis-results hidden" id="analysis-results">
+                                    <div class="quality-score">
+                                        <div class="score-circle" id="quality-circle">
+                                            <span id="quality-score">--</span>
+                                        </div>
+                                        <span class="quality-label" id="quality-label">Quality</span>
+                                    </div>
+                                    <div class="analysis-details" id="analysis-details"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download Section -->
+                        <div class="download-section hidden" id="download-section">
+                            <h3><i class="fas fa-download"></i> Processed Files</h3>
+                            <div class="download-list" id="download-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-message" id="status-message">
+                <i class="fas fa-info-circle"></i>
+                <span>Ready to record or upload audio</span>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay hidden" id="loading-overlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p id="loading-text">Processing...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
